@@ -1,0 +1,79 @@
+repository_type: pipeline
+
+nf_core_version: 4.0.1
+
+lint:
+  files_unchanged:
+    - docs/CONTRIBUTING.md
+    - assets/sendmail_template.txt
+    - .github/ISSUE_TEMPLATE/bug_report.yml
+    - .github/ISSUE_TEMPLATE/config.yml
+    - .github/ISSUE_TEMPLATE/feature_request.yml
+    - .github/PULL_REQUEST_TEMPLATE.md
+    - .github/workflows/branch.yml
+    - .github/workflows/linting_comment.yml
+    - .github/workflows/linting.yml
+    - .github/.dockstore.yml
+    - CODE_OF_CONDUCT.md
+    - assets/nf-core-nf-haphir_logo_light.png
+    - docs/images/nf-core-nf-haphir_logo_light.png
+    - docs/images/nf-core-nf-haphir_logo_dark.png
+    - .github/ISSUE_TEMPLATE/bug_report.yml
+    - .github/PULL_REQUEST_TEMPLATE.md
+    - assets/email_template.txt
+    - docs/README.md
+  nextflow_config:
+    - manifest.name
+    - manifest.homePage
+  multiqc_config: false
+  files_exist:
+    - CHANGELOG.md
+    - assets/multiqc_config.yml
+    - conf/igenomes.config
+    - conf/igenomes_ignored.config
+    - docs/CONTRIBUTING.md
+    - docs/output.md
+    - docs/README.md
+    - docs/usage.md
+    - .github/ISSUE_TEMPLATE/bug_report.yml
+    - .github/ISSUE_TEMPLATE/feature_request.yml
+    - .github/PULL_REQUEST_TEMPLATE.md
+    - .github/.dockstore.yml
+    - docs/CONTRIBUTING.md
+    - .github/workflows/branch.yml
+    - .github/workflows/nf-test.yml
+    - .github/actions/get-shards/action.yml
+    - .github/actions/nf-test/action.yml
+    - .github/workflows/linting_comment.yml
+    - .github/workflows/linting.yml
+    - CODE_OF_CONDUCT.md
+    - assets/nf-core-nf-haphir_logo_light.png
+    - docs/images/nf-core-nf-haphir_logo_light.png
+    - docs/images/nf-core-nf-haphir_logo_dark.png
+    - .github/ISSUE_TEMPLATE/config.yml
+    - .github/workflows/awstest.yml
+    - .github/workflows/awsfulltest.yml
+    - CITATIONS.md
+  readme:
+    - nextflow_badge
+
+template:
+  org: Kincekara
+  name: nf-haphir
+  description: Hybrid Assembly of PacBio HiFi and Illumina Reads
+  author: Kutluhan Incekara
+  version: 1.0.0dev
+  force: true
+  outdir: .
+  skip_features:
+    - github
+    - changelog
+    - ci
+    - igenomes
+    - multiqc
+    - fastqc
+    - gpu
+    - codespaces
+    - citations
+    - documentation
+  is_nfcore: false
