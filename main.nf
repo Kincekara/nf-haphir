@@ -13,7 +13,7 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { NF-HAPHIR  } from './workflows/nf-haphir'
+include { HAPHIR } from './workflows/haphir'
 include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_nf-haphir_pipeline'
 include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_nf-haphir_pipeline'
 /*
@@ -25,7 +25,7 @@ include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_nf-h
 //
 // WORKFLOW: Run main analysis pipeline depending on type of input
 //
-workflow KINCEKARA_NF-HAPHIR {
+workflow KINCEKARA_HAPHIR {
 
     take:
     samplesheet // channel: samplesheet read in from --input
@@ -35,7 +35,7 @@ workflow KINCEKARA_NF-HAPHIR {
     //
     // WORKFLOW: Run pipeline
     //
-    NF-HAPHIR (
+    HAPHIR (
         samplesheet,
         params.outdir,
     )
@@ -67,7 +67,7 @@ workflow {
     //
     // WORKFLOW: Run main workflow
     //
-    KINCEKARA_NF-HAPHIR (
+    KINCEKARA_HAPHIR (
         PIPELINE_INITIALISATION.out.samplesheet
     )
     //
