@@ -18,30 +18,6 @@ include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_nf-h
 include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_nf-haphir_pipeline'
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    NAMED WORKFLOWS FOR PIPELINE
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-
-//
-// WORKFLOW: Run main analysis pipeline depending on type of input
-//
-workflow KINCEKARA_HAPHIR {
-
-    take:
-    samplesheet // channel: samplesheet read in from --input
-
-    main:
-
-    //
-    // WORKFLOW: Run pipeline
-    //
-    HAPHIR (
-        samplesheet,
-        params.outdir,
-    )
-}
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
@@ -67,7 +43,7 @@ workflow {
     //
     // WORKFLOW: Run main workflow
     //
-    KINCEKARA_HAPHIR (
+    HAPHIR (
         PIPELINE_INITIALISATION.out.samplesheet
     )
     //
