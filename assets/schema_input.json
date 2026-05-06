@@ -33,6 +33,11 @@
                 "exists": true,
                 "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.f(ast)?q\\.gz$",
                 "errorMessage": "FastQ file for reads 2 cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
+            },
+            "organism": {
+                "type": "string",
+                "pattern": "^[A-Z][a-z]+ [a-z]+$||^[A-Z][a-z]+ [a-z]+( [a-z]+\\.? [a-z0-9-]+)?$",
+                "errorMessage": "Organism name provided in the format 'Genus species' or 'Genus species subspecies/strain'"
             }
         },
         "required": ["sample", "long_fq"]
