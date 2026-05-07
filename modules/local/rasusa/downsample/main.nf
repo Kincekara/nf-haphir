@@ -5,7 +5,7 @@ process DOWNSAMPLE {
     container 'staphb/rasusa:4.1.0'
 
     input:
-    tuple val(meta), val(genome_size), path(long_fq)
+    tuple val(meta), path(long_fq), val(genome_size)
 
     output:
     tuple val(meta), path("*.downsampled.fastq.gz"), emit: downsampled_fq
