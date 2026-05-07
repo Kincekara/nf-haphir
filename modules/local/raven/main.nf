@@ -5,7 +5,7 @@ process RAVEN_ASM {
     container 'staphb/raven:1.8.3-noble'
 
     input:
-    tuple val(meta), path(long_fq), val(genome_size)
+    tuple val(meta), path(long_fq)
 
     output:
     tuple val(meta), path("*.fasta"), emit: asm
