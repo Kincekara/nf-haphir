@@ -18,7 +18,7 @@ process ESTIMATE_GENOME_SIZE {
     # find genome size
     lrge \\
     -P pb \\
-    -t ~{cpu} \\
+    -t ${task.cpus} \\
     -o gsize.txt \\
     ${long_fq}   
 
@@ -28,7 +28,7 @@ process ESTIMATE_GENOME_SIZE {
     # version control
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        lrge: \$(lrge --version | cut -d " " -f2")
+        lrge: \$(lrge --version | cut -d " " -f2)
     END_VERSIONS
     """
 }
