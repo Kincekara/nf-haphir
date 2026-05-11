@@ -8,9 +8,9 @@ process PLASSEMBLER_ASM {
     tuple val(meta), path (long_fq), path(short_fq1), path(short_fq2), path(flye_asm), path(flye_info)
 
     output:
-    tuple val(meta), path("*.plassembler.fasta"), emit: asm
-    tuple val(meta), path("*.plassembler.gfa"), emit: gfa
-    tuple val(meta), path("*.summary.tsv"), emit: summary
+    tuple val(meta), path("out/*_plasmids.fasta"), emit: asm
+    tuple val(meta), path("out/*_plasmids.gfa"), emit: gfa
+    tuple val(meta), path("out/*_summary.tsv"), emit: summary
 
     when:
     task.ext.when == null || task.ext.when
