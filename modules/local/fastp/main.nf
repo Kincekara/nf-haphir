@@ -8,7 +8,7 @@ process TRIM_PE {
     tuple val(meta), path(short_fq1), path(short_fq2)
 
     output:
-    tuple val(meta), path("*.trimmed.fq{1.2}.gz"), emit: trimmed_short_fqs
+    tuple val(meta), path("*.trimmed.fq1.gz"), path("*.trimmed.fq2.gz"), emit: trimmed_short_fqs
     tuple val(meta), path("*.fastp.html"), emit: fastp_report
 
     when:
