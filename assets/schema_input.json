@@ -13,21 +13,33 @@
                 "errorMessage": "Sample name must be provided and cannot contain spaces",
                 "meta": ["id"]
             },
-            "fastq_1": {
+            "long_fq": {
+                "type": "string",
+                "format": "file-path",
+                "exists": true,
+                "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.f(ast)?q\\.gz$||\\.bam$",
+                "errorMessage": "HiFi reads must be provided, cannot contain spaces and must have extension '.fq.gz', '.fastq.gz or '.bam'"
+            },
+            "short_fq1": {
                 "type": "string",
                 "format": "file-path",
                 "exists": true,
                 "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.f(ast)?q\\.gz$",
                 "errorMessage": "FastQ file for reads 1 must be provided, cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
             },
-            "fastq_2": {
+            "short_fq2": {
                 "type": "string",
                 "format": "file-path",
                 "exists": true,
                 "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.f(ast)?q\\.gz$",
                 "errorMessage": "FastQ file for reads 2 cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
+            },
+            "organism": {
+                "type": "string",
+                "pattern": "^[A-Z][a-z]+ [a-z]+$||^[A-Z][a-z]+ [a-z]+( [a-z]+\\.? [a-z0-9-]+)?$",
+                "errorMessage": "Organism name provided in the format 'Genus species' or 'Genus species subspecies/strain'"
             }
         },
-        "required": ["sample", "fastq_1"]
+        "required": ["sample", "long_fq"]
     }
 }

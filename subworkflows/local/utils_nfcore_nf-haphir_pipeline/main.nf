@@ -35,6 +35,7 @@ workflow PIPELINE_INITIALISATION {
     help              // boolean: Display help message and exit
     help_full         // boolean: Show the full help message
     show_hidden       // boolean: Show hidden parameters in the help message
+    cli_typecast     
 
     main:
 
@@ -71,7 +72,8 @@ workflow PIPELINE_INITIALISATION {
         show_hidden,
         before_text,
         after_text,
-        command
+        command,
+        cli_typecast
     )
 
     //
@@ -88,20 +90,29 @@ workflow PIPELINE_INITIALISATION {
     channel
         .fromList(samplesheetToList(input, "${projectDir}/assets/schema_input.json"))
         .map {
-            meta, fastq_1, fastq_2 ->
-                if (!fastq_2) {
-                    return [ meta.id, meta + [ single_end:true ], [ fastq_1 ] ]
+            meta, long_fq, short_fq1, short_fq2, organism ->
+                if (organism) {
+                    if ((short_fq1) && (short_fq2)) {
+                        return [ meta.id, meta + [ hybrid:true , organism:true], [ long_fq, short_fq1, short_fq2, organism ] ]
+                    } else {
+                        return [ meta.id, meta + [ hybrid:false, organism:false ], [ long_fq, organism ] ]
+                    }
                 } else {
-                    return [ meta.id, meta + [ single_end:false ], [ fastq_1, fastq_2 ] ]
+                    if ((short_fq1) && (short_fq2)) {
+                        return [ meta.id, meta + [ hybrid:true, organism:false ], [ long_fq, short_fq1, short_fq2 ] ]
+                    } else {
+                        return [ meta.id, meta + [ hybrid:false, organism:false ], [ long_fq ] ]
+                    }
                 }
-        }
+            }
+
         .groupTuple()
         .map { samplesheet ->
             validateInputSamplesheet(samplesheet)
         }
         .map {
-            meta, fastqs ->
-                return [ meta, fastqs.flatten() ]
+            meta, data ->
+                return [ meta, data.flatten() ]
         }
         .set { ch_samplesheet }
 
@@ -163,7 +174,7 @@ workflow PIPELINE_COMPLETION {
 // Validate channels from input samplesheet
 //
 def validateInputSamplesheet(input) {
-    def (metas, fastqs) = input[1..2]
+    def (metas, data) = input[1..2]
 
     // Check that multiple runs of the same sample are of the same datatype i.e. single-end / paired-end
     def endedness_ok = metas.collect{ meta -> meta.single_end }.unique().size == 1
@@ -171,5 +182,5 @@ def validateInputSamplesheet(input) {
         error("Please check input samplesheet -> Multiple runs of a sample must be of the same datatype i.e. single-end or paired-end: ${metas[0].id}")
     }
 
-    return [ metas[0], fastqs ]
+    return [ metas[0], data ]
 }
