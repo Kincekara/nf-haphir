@@ -8,7 +8,7 @@ process AMRFINDER {
     tuple val(meta), path(assembly), path(bakta_faa), path(bakta_gff), val(organism)
 
     output:
-    tuple val(meta), path("*.amrfinderplus.tsv"), emit: amrfinder_report
+    tuple val(meta), path("*.amrfinder.tsv"), emit: amrfinder_report
 
     when:
     task.ext.when == null || task.ext.when
