@@ -56,8 +56,7 @@ lint:
     - manifest.homePage
   readme:
     - nextflow_badge
-nf_core_version: 4.0.2
-repository_type: pipeline
+
 template:
   author: Kutluhan Incekara
   description: Hybrid Assembly of PacBio HiFi and Illumina Reads
