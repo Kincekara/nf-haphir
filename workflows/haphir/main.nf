@@ -32,7 +32,6 @@ include { AMRFINDER              } from '../../modules/local/amrfinderplus/'
 workflow HAPHIR {
     take:
     ch_samplesheet // channel: samplesheet read in from --input
-    outdir
 
     main:
 
@@ -61,55 +60,140 @@ workflow HAPHIR {
     def ch_collated_versions = softwareVersionsToYAML(ch_versions.mix(topic_versions.versions_file))
         .mix(topic_versions_string)
         .collectFile(
-            storeDir: "${outdir}/pipeline_info",
+            storeDir: "${params.outdir}/pipeline_info",
             name: 'nf-haphir_software_' + 'versions.yml',
             sort: true,
             newLine: true,
         )
 
-    // Genome size estimation
-    ESTIMATE_GENOME_SIZE(ch_samplesheet)
+    def criteria = multiMapCriteria {
+    meta, data ->
+        def long_fq   = data[0]
+        def short_fq1 = data.size() >= 3 ? data[1] : null
+        def short_fq2 = data.size() >= 3 ? data[2] : null
+        def organism  = data.size() == 4 ? data[3] : null
 
-    // // Downsampling
-    // DOWNSAMPLE(ch_samplesheet)
+        short_fqs:  meta.hybrid ? tuple(meta, short_fq1, short_fq2) : tuple(meta, null, null)
+        long_fq:    long_fq ? tuple(meta, long_fq) : tuple(meta, null)
+        organism:   meta.organism ? tuple(meta, organism) : tuple(meta, null)
+    }
 
-    // // Flye assembly
-    // FLYE_ASM(ch_samplesheet)
-
-    // // Hifiasm assembly
-    // HIFIASM_ASM(ch_samplesheet)
-
-    // // wtdbg2 assembly
-    // WTDBG2_ASM(ch_samplesheet)
-
-    // // Raven assembly
-    // RAVEN_ASM(ch_samplesheet)
-
-    // // Combine assemblies with Autocycler
-    // COMBINE_ASMS(ch_samplesheet)
-
-    // // Plasmid recovery & polishing
-    // // if PE data is available, use trimmed PE reads for plasmid recovery with Plassembler, otherwise use untrimmed long reads
-    // if (ch_samplesheet.filter { it.short_fq1 != null && it.short_fq2 != null }.count() > 0) {
-    //     DOWNSAMPLE_PE(ch_samplesheet)
-    //     TRIM_PE(ch_samplesheet)
-    //     PLASSEMBLER_ASM(ch_samplesheet)
-    //     LABEL_AND_ALIGN(ch_samplesheet)
-    //     MERGE_ASMS(ch_samplesheet)
-    //     POLISH(ch_samplesheet)
-    // }
-
-    // REORIENT(ch_samplesheet)
+    ch_samplesheet
+        .multiMap (criteria)
+        .set { ch_input }
     
-    // ASM_VISUALIZATION(ch_samplesheet)
+    // Genome size estimation
+    ESTIMATE_GENOME_SIZE(ch_input.long_fq)
 
-    // if (params.annotation || params.amrfinder) {
-    //     ANNOTATION(ch_samplesheet)
-    // }
+    // Downsampling
+    DOWNSAMPLE(
+        ch_input.long_fq
+        .join(ESTIMATE_GENOME_SIZE.out.gsize)
+        )
 
-    // if (params.amrfinder) {
-    //         AMRFINDER(ch_samplesheet)
-    //     }
+    // Flye assembly
+    FLYE_ASM(
+        DOWNSAMPLE.out.downsampled_fq
+        .join(ESTIMATE_GENOME_SIZE.out.gsize)
+    )
+
+    // Hifiasm assembly
+    HIFIASM_ASM(
+        DOWNSAMPLE.out.downsampled_fq
+        .join(ESTIMATE_GENOME_SIZE.out.gsize)
+    )
+
+    // Wtdbg2 assembly
+    WTDBG2_ASM(
+        DOWNSAMPLE.out.downsampled_fq
+        .join(ESTIMATE_GENOME_SIZE.out.gsize)
+    )
+
+    // Raven assembly
+    RAVEN_ASM(
+        DOWNSAMPLE.out.downsampled_fq
+    )
+
+    // Combine assemblies with Autocycler
+    COMBINE_ASMS(
+        HIFIASM_ASM.out.asm
+        .join(FLYE_ASM.out.asm)
+        .join(WTDBG2_ASM.out.asm)
+        .join(RAVEN_ASM.out.asm)
+    )
+
+    // --> Plasmid recovery & polishing
+    // Downsample PE reads if available
+    DOWNSAMPLE_PE(
+        ch_input.short_fqs
+        .join(ESTIMATE_GENOME_SIZE.out.gsize)
+        )
+    
+    // Trim PE reads with fastp
+    TRIM_PE(DOWNSAMPLE_PE.out.short_fqs)
+
+    // Separate hybrid and HiFi-only samples based on the presence of short reads
+    ch_hybrid = DOWNSAMPLE.out.downsampled_fq
+        .join(TRIM_PE.out.trimmed_short_fqs)
+        .join(FLYE_ASM.out.asm)
+        .join(FLYE_ASM.out.asm_info)
+        .filter { tuple -> tuple[0].hybrid == true }
+    
+    ch_hifi =  DOWNSAMPLE.out.downsampled_fq
+        .filter { tuple -> tuple[0].hybrid == false } 
+    
+    // print sample IDs for hybrid and HiFi-only samples
+    ch_hybrid.view { tuple -> "Hybrid samples: ${tuple[0].id}" }
+    ch_hifi.view { tuple -> "HiFi-only samples: ${tuple[0].id}" }
+
+    // recover plasmids with plassembler
+    PLASSEMBLER_ASM(ch_hybrid)
+
+    // label contigs and align with minimap2
+    LABEL_AND_ALIGN(
+        COMBINE_ASMS.out.asm
+        .join(PLASSEMBLER_ASM.out.asm)
+    )
+
+    // merge recovered plasmids
+    MERGE_ASMS(LABEL_AND_ALIGN.out.overlaps)
+    
+    // polish with polypolish
+    POLISH(
+        MERGE_ASMS.out.merged_asm
+        .join(ch_input.short_fqs)
+    )
+    // <-- end of plasmid recovery & polishing
+
+    // reorient with dnaapler
+    REORIENT(
+        POLISH.out.polished_asm
+        .mix(ch_hifi)
+    ) 
+    
+    ASM_VISUALIZATION(
+        HIFIASM_ASM.out.asm_graph
+        .join(FLYE_ASM.out.asm_graph)
+        .join(RAVEN_ASM.out.asm_graph)
+        .join(WTDBG2_ASM.out.asm)
+        .join(COMBINE_ASMS.out.asm_graph)
+        .join(PLASSEMBLER_ASM.out.asm_graph)
+        .join(REORIENT.out.reoriented_asm)
+    )
+
+    if ( params.annotation || params.amrfinder ) {
+        ANNOTATION(
+            REORIENT.out.reoriented_asm
+            .join(ch_input.organism)
+        )
+    }
+
+    if ( params.amrfinder ) {
+            AMRFINDER(
+                ANNOTATION.out.bakta
+                .join(ch_input.organism)
+            )
+        }
 
     emit:
     versions = ch_versions // channel: [ path(versions.yml) ]
