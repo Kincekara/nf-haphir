@@ -23,6 +23,16 @@
                     "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row.",
                     "fa_icon": "fas fa-file-csv"
                 },
+                "annotation": {
+                    "type": "boolean",
+                    "description": "Whether to run Bakta annotation",
+                    "help_text": "If true, pipeline will run Bakta to annotate the assembled genomes. If false, the annotation step will be skipped."                    
+                },
+                "amrfinder": {
+                    "type": "boolean",
+                    "description": "Whether to run AMRFinderPlus",
+                    "help_text": "If true, pipeline will run AMRFinderPlus to identify antimicrobial resistance genes in the assembled genomes. If false, the AMRFinderPlus step will be skipped."
+                },
                 "outdir": {
                     "type": "string",
                     "format": "directory-path",
@@ -159,6 +169,10 @@
                 "show_hidden": {
                     "type": "boolean",
                     "description": "Display hidden parameters in the help message (only works when --help or --help_full are provided)."
+                },
+                "cli_typecast": {
+                    "type": "boolean",
+                    "description": "Whether to perform typecasting of CLI parameters. Set this to `null` to use the default behaviour."
                 }
             }
         }
