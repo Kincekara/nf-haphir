@@ -48,32 +48,32 @@ process ASM_VISUALIZATION {
             <div class="grid">
                 <div class="grid-item">
                     <div class="caption">Hifiasm</div>
-                    <img src="data:image/png;base64,$(base64 -w 0 hifiasm.png)" alt="Hifiasm" />
+                    <img src="data:image/png;base64,\$(base64 -w 0 hifiasm.png)" alt="Hifiasm" />
                 </div>
                 <div class="grid-item">
                     <div class="caption">Flye</div>
-                    <img src="data:image/png;base64,$(base64 -w 0 flye.png)" alt="Flye" />
+                    <img src="data:image/png;base64,\$(base64 -w 0 flye.png)" alt="Flye" />
                 </div>
                 <div class="grid-item">
                     <div class="caption">Raven</div>
-                    <img src="data:image/png;base64,$(base64 -w 0 raven.png)" alt="Raven" />
+                    <img src="data:image/png;base64,\$(base64 -w 0 raven.png)" alt="Raven" />
                 </div>
                 <div class="grid-item">
                     <div class="caption">Wtdbg2</div>
-                    <img src="data:image/png;base64,$(base64 -w 0 wtdbg2.png)" alt="Wtdbg2" />
+                    <img src="data:image/png;base64,\$(base64 -w 0 wtdbg2.png)" alt="Wtdbg2" />
                 </div>
                 <div class="grid-item">
                     <div class="caption">Autocycler</div>
-                    <img src="data:image/png;base64,$(base64 -w 0 autocycler.png)" alt="Autocycler" />
+                    <img src="data:image/png;base64,\$(base64 -w 0 autocycler.png)" alt="Autocycler" />
                 </div>
                 <!--<div class="grid-item">
                     <div class="caption">Plassembler</div>
-                    <img src="data:image/png;base64,$(base64 -w 0 plassembler.png)" alt="Plassembler">
+                    <img src="data:image/png;base64,\$(base64 -w 0 plassembler.png)" alt="Plassembler">
                 </div>-->
             </div>
             <br><br>
             <h2>Final Assembly</h2>
-            <img src="data:image/png;base64,$(base64 -w 0 final.png)" alt="final_asm">                
+            <img src="data:image/png;base64,\$(base64 -w 0 final.png)" alt="final_asm">                
         </body>
         <hr>
         <footer>
