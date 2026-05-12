@@ -8,7 +8,7 @@ process ANNOTATION {
     tuple val(meta), path(final_asm), val(organism)
 
     output:
-    tuple val(meta), path("*.fna"), path("*.faa"), path("*.gff3"), emit: bakta
+    tuple val(meta), path("bakta/*.fna"), path("bakta/*.faa"), path("bakta/*.gff3"), emit: bakta
     tuple val(meta), path("*.bakta.tar.gz"), emit: bakta_output
 
     when:
@@ -18,11 +18,11 @@ process ANNOTATION {
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
     # annotate with bakta
-    if [ -n "${organism}" ]; then
+    if [ "${organism}" != "null" ]; then
         genus=\$(echo ${organism} | cut -d ' ' -f1)
         species=\$(echo ${organism} | cut -d ' ' -f2)
 
-        bakta \
+        bakta \\
         --threads ${task.cpus} \\
         --prefix ${prefix} \\
         --complete \\
@@ -43,6 +43,8 @@ process ANNOTATION {
 
     # compress outputs
     tar -czvf ${prefix}.bakta.tar.gz bakta/
+
+    rm bakta/${prefix}.hypotheticals.faa
 
     # version control
     cat <<-END_VERSIONS > versions.yml
