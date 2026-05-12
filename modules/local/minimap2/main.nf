@@ -8,9 +8,7 @@ process LABEL_AND_ALIGN {
     tuple val(meta), path(autocycler_asm), path(plassembler_asm)
 
     output:
-    tuple val(meta), path("*.overlaps.paf"), emit: paf
-    tuple val(meta), path("*.autocycler.marked.fasta"), emit: ac_marked
-    tuple val(meta), path("*.plasmids.marked.fasta"), emit: pl_marked
+    tuple val(meta), path("*.autocycler.marked.fasta"), path("*.plasmids.marked.fasta"), path("*.overlaps.paf"), emit: overlaps
 
     when:
     task.ext.when == null || task.ext.when
