@@ -169,6 +169,10 @@
                 "show_hidden": {
                     "type": "boolean",
                     "description": "Display hidden parameters in the help message (only works when --help or --help_full are provided)."
+                },
+                "cli_typecast": {
+                    "type": "boolean",
+                    "description": "Whether to perform typecasting of CLI parameters. Set this to `null` to use the default behaviour."
                 }
             }
         }
