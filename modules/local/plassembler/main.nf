@@ -9,7 +9,7 @@ process PLASSEMBLER_ASM {
 
     output:
     tuple val(meta), path("out/*_plasmids.fasta"), emit: asm
-    tuple val(meta), path("out/*_plasmids.gfa"), emit: gfa
+    tuple val(meta), path("out/*_plasmids.gfa"), emit: asm_graph
     tuple val(meta), path("out/*_summary.tsv"), emit: summary
 
     when:
