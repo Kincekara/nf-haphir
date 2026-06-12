@@ -34,8 +34,7 @@ workflow PIPELINE_INITIALISATION {
     input             //  string: Path to input samplesheet
     help              // boolean: Display help message and exit
     help_full         // boolean: Show the full help message
-    show_hidden       // boolean: Show hidden parameters in the help message
-    cli_typecast     
+    show_hidden       // boolean: Show hidden parameters in the help message    
 
     main:
 
@@ -55,7 +54,16 @@ workflow PIPELINE_INITIALISATION {
     // Validate parameters and generate parameter summary to stdout
     //
 
-    def before_text = ""
+    def before_text = """
+                                                                     
+        ▄▄      ▄▄▄   ▄▄▄   ▄▄▄▄   ▄▄▄▄▄▄▄   ▄▄▄   ▄▄▄     ▄▄▄▄▄▄▄   
+       ██       ███   ███ ▄██▀▀██▄ ███▀▀███▄ ███   ███ ▀▀  ███▀▀███▄ 
+████▄ ▀██▀      █████████ ███  ███ ███▄▄███▀ █████████ ██  ███▄▄███▀ 
+██ ██  ██ ▀▀▀▀▀ ███▀▀▀███ ███▀▀███ ███▀▀▀▀   ███▀▀▀███ ██  ███▀▀██▄  
+██ ██  ██       ███   ███ ███  ███ ███       ███   ███ ██▄ ███  ▀███ 
+                                                                     
+                                                                     
+"""
     def after_text = ""
     if (monochrome_logs) {
         before_text = before_text.replaceAll(/\033\[[0-9;]*m/, '')
@@ -73,7 +81,7 @@ workflow PIPELINE_INITIALISATION {
         before_text,
         after_text,
         command,
-        cli_typecast
+        null
     )
 
     //
