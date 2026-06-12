@@ -132,22 +132,28 @@ workflow HAPHIR {
     // Trim PE reads with fastp
     TRIM_PE(DOWNSAMPLE_PE.out.short_fqs)
 
-    // Separate hybrid and HiFi-only samples based on the presence of short reads
-    ch_hybrid = DOWNSAMPLE.out.downsampled_fq
-        .join(TRIM_PE.out.trimmed_short_fqs)
-        .join(FLYE_ASM.out.asm)
-        .join(FLYE_ASM.out.asm_info)
-        .filter { tuple -> tuple[0].hybrid == true }
+    // // Separate hybrid and HiFi-only samples based on the presence of short reads
+    // ch_hybrid = DOWNSAMPLE.out.downsampled_fq
+    //     .join(TRIM_PE.out.trimmed_short_fqs)
+    //     .join(FLYE_ASM.out.asm)
+    //     .join(FLYE_ASM.out.asm_info)
+    //     .filter { tuple -> tuple[0].hybrid == true }
     
-    ch_hifi =  DOWNSAMPLE.out.downsampled_fq
-        .filter { tuple -> tuple[0].hybrid == false } 
+    // ch_hifi =  DOWNSAMPLE.out.downsampled_fq
+    //     .filter { tuple -> tuple[0].hybrid == false } 
     
-    // print sample IDs for hybrid and HiFi-only samples
-    ch_hybrid.view { tuple -> "Hybrid samples: ${tuple[0].id}" }
-    ch_hifi.view { tuple -> "HiFi-only samples: ${tuple[0].id}" }
+    // // print sample IDs for hybrid and HiFi-only samples
+    // ch_hybrid.view { tuple -> "Hybrid samples: ${tuple[0].id}" }
+    // ch_hifi.view { tuple -> "HiFi-only samples: ${tuple[0].id}" }
 
     // recover plasmids with plassembler
-    PLASSEMBLER_ASM(ch_hybrid)
+    //PLASSEMBLER_ASM(ch_hybrid)
+    PLASSEMBLER_ASM(
+        DOWNSAMPLE.out.downsampled_fq        
+        .join(FLYE_ASM.out.asm)
+        .join(FLYE_ASM.out.asm_info)
+        .join(TRIM_PE.out.trimmed_short_fqs, remainder: true)
+    )
 
     // label contigs and align with minimap2
     LABEL_AND_ALIGN(
@@ -163,12 +169,14 @@ workflow HAPHIR {
         MERGE_ASMS.out.merged_asm
         .join(ch_input.short_fqs)
     )
-    // <-- end of plasmid recovery & polishing
 
     // reorient with dnaapler
     REORIENT(
         POLISH.out.polished_asm
-        .mix(ch_hifi)
+        .mix(
+            MERGE_ASMS.out.merged_asm
+            .filter { tuple -> tuple[0].hybrid == false }
+        )
     ) 
     
     ASM_VISUALIZATION(
@@ -179,6 +187,13 @@ workflow HAPHIR {
         .join(COMBINE_ASMS.out.asm_graph)
         .join(PLASSEMBLER_ASM.out.asm_graph)
         .join(REORIENT.out.reoriented_asm)
+        .join(HIFIASM_ASM.out.asm_ctg_len)
+        .join(FLYE_ASM.out.asm_ctg_len)
+        .join(RAVEN_ASM.out.asm_ctg_len)
+        .join(WTDBG2_ASM.out.asm_ctg_len)
+        .join(COMBINE_ASMS.out.asm_ctg_len)
+        .join(PLASSEMBLER_ASM.out.asm_ctg_len)
+        .join(REORIENT.out.asm_ctg_len)
     )
 
     if ( params.annotation || params.amrfinder ) {
