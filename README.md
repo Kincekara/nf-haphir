@@ -16,8 +16,6 @@ HAPHiR performs high‑quality bacterial genome assembly using PacBio HiFi long 
 
 The workflow runs multiple long‑read assemblers in parallel (Flye, Hifiasm, Raven, wtdbg2) and generates a unified, high‑confidence consensus assembly using Autocycler. Small circular plasmids are recovered through a dedicated hybrid assembly step using Plassembler, ensuring both chromosomal and plasmid components are accurately reconstructed.
 
-HAPHiR is designed for cloud‑native execution on Terra, but can also be run locally using WDL executer such as miniwdl or Cromwell.
-
 <!-- TODO nf-core: Include a figure that guides the user through the major workflow steps. Many nf-core
      workflows use the "tube map" design for that. See https://nf-co.re/docs/community/brand/workflow-schematics#examples for examples.   -->
 <!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->
