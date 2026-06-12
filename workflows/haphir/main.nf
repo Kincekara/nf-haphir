@@ -14,7 +14,8 @@ include { RAVEN_ASM              } from '../../modules/local/raven/'
 include { WTDBG2_ASM             } from '../../modules/local/wtdbg2/'
 include { COMBINE_ASMS           } from '../../modules/local/autocycler/'
 include { TRIM_PE                } from '../../modules/local/fastp/'
-include { PLASSEMBLER_ASM        } from '../../modules/local/plassembler/'
+include { PLASSEMBLER_ASM        } from '../../modules/local/plassembler/plassembler_asm/'
+include { PLASSEMBLER_ASM_LONG   } from '../../modules/local/plassembler/plassembler_asm_long/'
 include { LABEL_AND_ALIGN        } from '../../modules/local/minimap2/'
 include { MERGE_ASMS             } from '../../modules/local/biopython/'
 include { POLISH                 } from '../../modules/local/polypolish/'
@@ -126,6 +127,7 @@ workflow HAPHIR {
     // Downsample PE reads if available
     DOWNSAMPLE_PE(
         ch_input.short_fqs
+        .filter { tuple -> tuple[0].hybrid == true }
         .join(ESTIMATE_GENOME_SIZE.out.gsize)
         )
     
@@ -147,18 +149,29 @@ workflow HAPHIR {
     // ch_hifi.view { tuple -> "HiFi-only samples: ${tuple[0].id}" }
 
     // recover plasmids with plassembler
-    //PLASSEMBLER_ASM(ch_hybrid)
+
+    //PLASSEMBLER_ASM (hybrid)
     PLASSEMBLER_ASM(
-        DOWNSAMPLE.out.downsampled_fq        
+        DOWNSAMPLE.out.downsampled_fq
+        .filter { tuple -> tuple[0].hybrid == true }        
         .join(FLYE_ASM.out.asm)
         .join(FLYE_ASM.out.asm_info)
-        .join(TRIM_PE.out.trimmed_short_fqs, remainder: true)
+        .join(TRIM_PE.out.trimmed_short_fqs)
+    )
+
+    PLASSEMBLER_ASM_LONG(
+        DOWNSAMPLE.out.downsampled_fq
+        .filter { tuple -> tuple[0].hybrid == false }        
+        .join(FLYE_ASM.out.asm)
+        .join(FLYE_ASM.out.asm_info)
     )
 
     // label contigs and align with minimap2
     LABEL_AND_ALIGN(
         COMBINE_ASMS.out.asm
-        .join(PLASSEMBLER_ASM.out.asm)
+        .join(PLASSEMBLER_ASM.out.asm
+            .mix(PLASSEMBLER_ASM_LONG.out.asm)
+        )
     )
 
     // merge recovered plasmids
@@ -167,14 +180,14 @@ workflow HAPHIR {
     // polish with polypolish
     POLISH(
         MERGE_ASMS.out.merged_asm
+        .filter { tuple -> tuple[0].hybrid == true } 
         .join(ch_input.short_fqs)
     )
 
     // reorient with dnaapler
     REORIENT(
         POLISH.out.polished_asm
-        .mix(
-            MERGE_ASMS.out.merged_asm
+        .mix(MERGE_ASMS.out.merged_asm
             .filter { tuple -> tuple[0].hybrid == false }
         )
     ) 
@@ -185,14 +198,14 @@ workflow HAPHIR {
         .join(RAVEN_ASM.out.asm_graph)
         .join(WTDBG2_ASM.out.asm)
         .join(COMBINE_ASMS.out.asm_graph)
-        .join(PLASSEMBLER_ASM.out.asm_graph)
+        .join(PLASSEMBLER_ASM.out.asm_graph.mix(PLASSEMBLER_ASM_LONG.out.asm_graph))
         .join(REORIENT.out.reoriented_asm)
         .join(HIFIASM_ASM.out.asm_ctg_len)
         .join(FLYE_ASM.out.asm_ctg_len)
         .join(RAVEN_ASM.out.asm_ctg_len)
         .join(WTDBG2_ASM.out.asm_ctg_len)
         .join(COMBINE_ASMS.out.asm_ctg_len)
-        .join(PLASSEMBLER_ASM.out.asm_ctg_len)
+        .join(PLASSEMBLER_ASM.out.asm_ctg_len.mix(PLASSEMBLER_ASM_LONG.out.asm_ctg_len))
         .join(REORIENT.out.asm_ctg_len)
     )
 

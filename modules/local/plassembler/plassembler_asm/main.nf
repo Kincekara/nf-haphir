@@ -19,32 +19,19 @@ process PLASSEMBLER_ASM {
     script:
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    # plassembler
-    if [ -s "${short_fq1}" ] && [ -s "${short_fq2}" ]; then
-        plassembler run \\
-        --threads ${task.cpus} \\
-        --database /plassembler_db \\
-        --pacbio_model pacbio-hifi \\
-        --longreads ${long_fq} \\
-        --short_one ${short_fq1} \\
-        --short_two ${short_fq2} \\
-        --flye_assembly ${flye_asm} \\
-        --flye_info ${flye_info} \\
-        --skip_qc \\
-        --prefix ${prefix} \\
-        --outdir out
-    else
-        plassembler long \\
-        --threads ${task.cpus} \\
-        --database /plassembler_db \\
-        --pacbio_model pacbio-hifi \\
-        --longreads ${long_fq} \\
-        --flye_assembly ${flye_asm} \\
-        --flye_info ${flye_info} \\
-        --skip_qc \\
-        --prefix ${prefix} \\
-        --outdir out
-    fi
+    # plassembler  
+    plassembler run \\
+    --threads ${task.cpus} \\
+    --database /plassembler_db \\
+    --pacbio_model pacbio-hifi \\
+    --longreads ${long_fq} \\
+    --short_one ${short_fq1} \\
+    --short_two ${short_fq2} \\
+    --flye_assembly ${flye_asm} \\
+    --flye_info ${flye_info} \\
+    --skip_qc \\
+    --prefix ${prefix} \\
+    --outdir out
 
     # get contig lengths
     echo "Plassembler" > ${prefix}.plassembler.ctg_len.txt
