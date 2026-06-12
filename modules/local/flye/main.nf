@@ -11,6 +11,7 @@ process FLYE_ASM {
     tuple val(meta), path("*.flye.fasta"), emit: asm
     tuple val(meta), path("*.flye.gfa"), emit: asm_graph
     tuple val(meta), path("*.flye_info.txt"), emit: asm_info
+    tuple val(meta), path("*.flye.ctg_len.txt"), emit: asm_ctg_len
 
     when:
     task.ext.when == null || task.ext.when
@@ -29,6 +30,10 @@ process FLYE_ASM {
     mv ./flye_out/assembly.fasta ${prefix}.flye.fasta
     mv ./flye_out/assembly_graph.gfa ${prefix}.flye.gfa
     mv ./flye_out/assembly_info.txt ${prefix}.flye_info.txt
+
+    # get contig lengths
+    echo "Flye" > ${prefix}.flye.ctg_len.txt
+    awk 'NR > 1 {print \$2}' ${prefix}.flye_info.txt >> ${prefix}.flye.ctg_len.txt
 
     # version control
     cat <<-END_VERSIONS > versions.yml

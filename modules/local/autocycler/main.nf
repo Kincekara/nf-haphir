@@ -10,6 +10,7 @@ process COMBINE_ASMS {
     output:
     tuple val(meta), path("*.autocycler.fasta"), emit: asm
     tuple val(meta), path("*.autocycler.gfa"), emit: asm_graph
+    tuple val(meta), path("*.autocycler.ctg_len.txt"), emit: asm_ctg_len
 
     when:
     task.ext.when == null || task.ext.when
@@ -20,6 +21,9 @@ process COMBINE_ASMS {
     # collect assemblies
     mkdir assemblies
     cp ${hifiasm_asm} ${flye_asm} ${wtdbg2_asm} ${raven_asm} assemblies/
+    # give contigs from Hifiasm and Flye extra consensus weight
+    sed -i 's/^>.*\$/& Autocycler_consensus_weight=2/' assemblies/*hifiasm.fasta
+    sed -i 's/^>.*\$/& Autocycler_consensus_weight=2/' assemblies/*flye.fasta
     # compress
     autocycler compress -i assemblies -a autocycler_out
     # cluster
@@ -35,6 +39,10 @@ process COMBINE_ASMS {
     # rename outputs
     mv autocycler_out/consensus_assembly.fasta ${prefix}.autocycler.fasta
     mv autocycler_out/consensus_assembly.gfa ${prefix}.autocycler.gfa
+
+    # get contig lengths
+    echo "Autocycler" > ${prefix}.autocycler.ctg_len.txt
+    awk -F'length=' '/^>/{split(\$2,a," "); print a[1]}' ${prefix}.autocycler.fasta | sort -nr >> ${prefix}.autocycler.ctg_len.txt
 
     # version control
     cat <<-END_VERSIONS > versions.yml

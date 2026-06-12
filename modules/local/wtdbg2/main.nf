@@ -9,6 +9,7 @@ process WTDBG2_ASM {
 
     output:
     tuple val(meta), path("*.fasta"), emit: asm
+    tuple val(meta), path("*.wtdbg2.ctg_len.txt"), emit: asm_ctg_len
 
     when:
     task.ext.when == null || task.ext.when
@@ -22,17 +23,22 @@ process WTDBG2_ASM {
     -t ${task.cpus} \\
     -i ${long_fq} \\
     -g ${genome_size} \\
-    -o ${prefix}
+    -o ${prefix} \\
+    -S 2
 
     # derive consensus
     wtpoa-cns \\
     -t ${task.cpus} \\
     -i ${prefix}.ctg.lay.gz -fo ${prefix}.wtdbg2.fasta
 
+    # get contig lengths
+    echo "Wtdbg2" > ${prefix}.wtdbg2.ctg_len.txt
+    awk -F'len=' '/^>/{print \$2}' ${prefix}.wtdbg2.fasta | sort -nr >> ${prefix}.wtdbg2.ctg_len.txt
+
     # version control
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        hifiasm: \$(wtdbg2 --version | cut -d " " -f2)
+        wtdbg2: \$(wtdbg2 --version | cut -d " " -f2)
     END_VERSIONS
     """
 }
