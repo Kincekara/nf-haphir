@@ -83,6 +83,15 @@ workflow HAPHIR {
         .multiMap (criteria)
         .set { ch_input }
     
+    // Print sample IDs for hybrid and HiFi-only samples
+    ch_input.long_fq
+        .filter { tuple -> tuple[0].hybrid == true }
+        .view { tuple -> "Hybrid samples: ${tuple[0].id}" }
+    ch_input.long_fq
+        .filter { tuple -> tuple[0].hybrid == false }
+        .view { tuple -> "HiFi-only samples: ${tuple[0].id}" }
+
+
     // Genome size estimation
     ESTIMATE_GENOME_SIZE(ch_input.long_fq)
 
@@ -123,7 +132,6 @@ workflow HAPHIR {
         .join(RAVEN_ASM.out.asm)
     )
 
-    // --> Plasmid recovery & polishing
     // Downsample PE reads if available
     DOWNSAMPLE_PE(
         ch_input.short_fqs
@@ -134,23 +142,8 @@ workflow HAPHIR {
     // Trim PE reads with fastp
     TRIM_PE(DOWNSAMPLE_PE.out.short_fqs)
 
-    // // Separate hybrid and HiFi-only samples based on the presence of short reads
-    // ch_hybrid = DOWNSAMPLE.out.downsampled_fq
-    //     .join(TRIM_PE.out.trimmed_short_fqs)
-    //     .join(FLYE_ASM.out.asm)
-    //     .join(FLYE_ASM.out.asm_info)
-    //     .filter { tuple -> tuple[0].hybrid == true }
-    
-    // ch_hifi =  DOWNSAMPLE.out.downsampled_fq
-    //     .filter { tuple -> tuple[0].hybrid == false } 
-    
-    // // print sample IDs for hybrid and HiFi-only samples
-    // ch_hybrid.view { tuple -> "Hybrid samples: ${tuple[0].id}" }
-    // ch_hifi.view { tuple -> "HiFi-only samples: ${tuple[0].id}" }
-
-    // recover plasmids with plassembler
-
-    //PLASSEMBLER_ASM (hybrid)
+    // --> Recover plasmids with plassembler
+    // (hybrid)
     PLASSEMBLER_ASM(
         DOWNSAMPLE.out.downsampled_fq
         .filter { tuple -> tuple[0].hybrid == true }        
@@ -159,14 +152,16 @@ workflow HAPHIR {
         .join(TRIM_PE.out.trimmed_short_fqs)
     )
 
+    // (HiFi-only)
     PLASSEMBLER_ASM_LONG(
         DOWNSAMPLE.out.downsampled_fq
         .filter { tuple -> tuple[0].hybrid == false }        
         .join(FLYE_ASM.out.asm)
         .join(FLYE_ASM.out.asm_info)
     )
+    // <--
 
-    // label contigs and align with minimap2
+    // Label contigs and align with minimap2
     LABEL_AND_ALIGN(
         COMBINE_ASMS.out.asm
         .join(PLASSEMBLER_ASM.out.asm
@@ -174,17 +169,17 @@ workflow HAPHIR {
         )
     )
 
-    // merge recovered plasmids
+    // Merge recovered plasmids
     MERGE_ASMS(LABEL_AND_ALIGN.out.overlaps)
     
-    // polish with polypolish
+    // Polish with polypolish if short reads are available
     POLISH(
         MERGE_ASMS.out.merged_asm
         .filter { tuple -> tuple[0].hybrid == true } 
         .join(ch_input.short_fqs)
     )
 
-    // reorient with dnaapler
+    // Reorient with dnaapler
     REORIENT(
         POLISH.out.polished_asm
         .mix(MERGE_ASMS.out.merged_asm
@@ -192,6 +187,7 @@ workflow HAPHIR {
         )
     ) 
     
+    // Visualize assemblies with Bandage
     ASM_VISUALIZATION(
         HIFIASM_ASM.out.asm_graph
         .join(FLYE_ASM.out.asm_graph)
@@ -209,6 +205,7 @@ workflow HAPHIR {
         .join(REORIENT.out.asm_ctg_len)
     )
 
+    // Annotate with Bakta if requested
     if ( params.annotation || params.amrfinder ) {
         ANNOTATION(
             REORIENT.out.reoriented_asm
@@ -216,6 +213,7 @@ workflow HAPHIR {
         )
     }
 
+    // Annotate with AMRFinder if requested
     if ( params.amrfinder ) {
             AMRFINDER(
                 ANNOTATION.out.bakta
@@ -224,5 +222,5 @@ workflow HAPHIR {
         }
 
     emit:
-    versions = ch_versions // channel: [ path(versions.yml) ]
+    versions = ch_collated_versions // channel: [ path(versions.yml) ]
 }
