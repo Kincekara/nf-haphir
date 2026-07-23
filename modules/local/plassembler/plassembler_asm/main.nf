@@ -2,7 +2,7 @@ process PLASSEMBLER_ASM {
     
     tag "$meta.id"
     label 'process_high'
-    container 'staphb/plassembler:1.8.1'
+    container 'staphb/plassembler:1.8.3'
 
     input:
     tuple val(meta), path (long_fq), path(flye_asm), path(flye_info), path(short_fq1), path(short_fq2)
