@@ -9,6 +9,7 @@ process ESTIMATE_GENOME_SIZE {
 
     output:
     tuple val(meta), env("GSIZE"), emit: gsize
+    tuple val("${task.process}"), val('lrge'), eval("lrge --version | cut -d ' ' -f2"), emit: versions_lrge, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -25,10 +26,5 @@ process ESTIMATE_GENOME_SIZE {
     # round genome size
     GSIZE=\$(printf "%dm\\n" \$(( (\$(cat gsize.txt) +500000)/1000000 ))) 
 
-    # version control
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        lrge: \$(lrge --version | cut -d " " -f2)
-    END_VERSIONS
     """
 }

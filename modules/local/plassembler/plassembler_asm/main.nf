@@ -12,6 +12,7 @@ process PLASSEMBLER_ASM {
     tuple val(meta), path("out/*_plasmids.gfa"), emit: asm_graph
     tuple val(meta), path("out/*_summary.tsv"), emit: summary
     tuple val(meta), path("*.plassembler.ctg_len.txt"), emit: asm_ctg_len
+    tuple val("${task.process}"), val('plassembler'), eval("plassembler --version | cut -d ' ' -f3"), emit: versions_plassembler, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -37,10 +38,5 @@ process PLASSEMBLER_ASM {
     echo "Plassembler" > ${prefix}.plassembler.ctg_len.txt
     awk 'NR > 1 {print \$2}' out/${prefix}_summary.tsv >> ${prefix}.plassembler.ctg_len.txt
 
-    # version control
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        plassembler: \$(plassembler --version | cut -d " " -f3 | tr -d "\\n")
-    END_VERSIONS
     """
 }

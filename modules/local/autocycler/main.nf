@@ -11,6 +11,7 @@ process COMBINE_ASMS {
     tuple val(meta), path("*.autocycler.fasta"), emit: asm
     tuple val(meta), path("*.autocycler.gfa"), emit: asm_graph
     tuple val(meta), path("*.autocycler.ctg_len.txt"), emit: asm_ctg_len
+    tuple val("${task.process}"), val('autocycler'), eval("autocycler --version | cut -d ' ' -f2"), emit: versions_autocycler, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -43,11 +44,5 @@ process COMBINE_ASMS {
     # get contig lengths
     echo "Autocycler" > ${prefix}.autocycler.ctg_len.txt
     awk -F'length=' '/^>/{split(\$2,a," "); print a[1]}' ${prefix}.autocycler.fasta | sort -nr >> ${prefix}.autocycler.ctg_len.txt
-
-    # version control
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        autocycler: \$(autocycler --version | cut -d " " -f2)
-    END_VERSIONS
     """
 }

@@ -9,6 +9,7 @@ process MERGE_ASMS {
 
     output:
     tuple val(meta), path("*.merged.fasta"), emit: merged_asm
+    tuple val("${task.process}"), val('biopython'), eval("python3 -c \"import Bio; print(Bio.__version__)\""), emit: versions_biopython, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -26,10 +27,5 @@ process MERGE_ASMS {
 
     mv merge_summary.tsv ${prefix}.merge_summary.tsv
 
-    # version control
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        biopython: \$(python3 -c "import Bio; print(Bio.__version__)")
-    END_VERSIONS
     """
 }

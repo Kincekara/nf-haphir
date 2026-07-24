@@ -12,6 +12,7 @@ process FLYE_ASM {
     tuple val(meta), path("*.flye.gfa"), emit: asm_graph
     tuple val(meta), path("*.flye_info.txt"), emit: asm_info
     tuple val(meta), path("*.flye.ctg_len.txt"), emit: asm_ctg_len
+    tuple val("${task.process}"), val('flye'), eval("flye --version"), emit: versions_flye, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -35,11 +36,6 @@ process FLYE_ASM {
     echo "Flye" > ${prefix}.flye.ctg_len.txt
     awk 'NR > 1 {print \$2}' ${prefix}.flye_info.txt >> ${prefix}.flye.ctg_len.txt
 
-    # version control
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        flye: \$(flye --version)
-    END_VERSIONS
     """
 
 

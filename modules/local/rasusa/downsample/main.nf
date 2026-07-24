@@ -9,6 +9,7 @@ process DOWNSAMPLE {
 
     output:
     tuple val(meta), path("*.downsampled.fastq.gz"), emit: downsampled_fq
+    tuple val("${task.process}"), val('rasusa'), eval("rasusa --version | cut -d ' ' -f 2"), emit: versions_rasusa, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -25,10 +26,5 @@ process DOWNSAMPLE {
     --output-format fastq \\
     ${long_fq}
 
-    # version control
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        rasusa: \$(rasusa --version)
-    END_VERSIONS
     """
 }

@@ -10,6 +10,7 @@ process ANNOTATION {
     output:
     tuple val(meta), path("bakta/*.fna"), path("bakta/*.faa"), path("bakta/*.gff3"), emit: bakta
     tuple val(meta), path("*.bakta.tar.gz"), emit: bakta_output
+    tuple val("${task.process}"), val('bakta'), eval("bakta --version | cut -d ' ' -f2"), emit: versions_bakta, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -46,10 +47,5 @@ process ANNOTATION {
 
     rm bakta/${prefix}.hypotheticals.faa
 
-    # version control
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        bakta: \$(bakta --version | cut -d " " -f2)
-    END_VERSIONS
     """
 }

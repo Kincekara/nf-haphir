@@ -9,6 +9,7 @@ process POLISH {
 
     output:
     tuple val(meta), path("*.polished.fasta"), emit: polished_asm
+    tuple val("${task.process}"), val('polypolish'), eval("polypolish --version | cut -d ' ' -f2"), emit: versions_polypolish, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -30,10 +31,5 @@ process POLISH {
         polypolish polish ${draft_asm} alignments_1.sam alignments_2.sam > ${prefix}.polished.fasta
     fi
 
-    # version control
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        polypolish: \$(polypolish --version | cut -d " " -f2)
-    END_VERSIONS
     """
 }

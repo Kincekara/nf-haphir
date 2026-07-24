@@ -9,6 +9,7 @@ process LABEL_AND_ALIGN {
 
     output:
     tuple val(meta), path("*.autocycler.marked.fasta"), path("*.plasmids.marked.fasta"), path("*.overlaps.paf"), emit: overlaps
+    tuple val("${task.process}"), val('minimap2'), eval("minimap2 --version"), emit: versions_minimap2, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -22,11 +23,5 @@ process LABEL_AND_ALIGN {
 
     # align with minimap2
     minimap2 -x asm5 ${prefix}.autocycler.marked.fasta ${prefix}.plasmids.marked.fasta > ${prefix}.overlaps.paf
-
-    # version control
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        minimap2: \$(minimap2 --version)
-    END_VERSIONS
     """
 }

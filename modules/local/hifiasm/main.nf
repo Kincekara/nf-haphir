@@ -11,6 +11,7 @@ process HIFIASM_ASM {
     tuple val(meta), path("*.hifiasm.fasta"), emit: asm
     tuple val(meta), path("*.hifiasm.gfa"), emit: asm_graph
     tuple val(meta), path("*.hifiasm.ctg_len.txt"), emit: asm_ctg_len
+    tuple val("${task.process}"), val('hifiasm'), eval("hifiasm --version"), emit: versions_hifiasm, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -33,10 +34,5 @@ process HIFIASM_ASM {
     echo "Hifiasm" > ${prefix}.hifiasm.ctg_len.txt
     awk -F'length=' '/^>/{print \$2}' ${prefix}.hifiasm.fasta | sort -nr >> ${prefix}.hifiasm.ctg_len.txt
 
-    # version control
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        hifiasm: \$(hifiasm --version)
-    END_VERSIONS
     """
 }

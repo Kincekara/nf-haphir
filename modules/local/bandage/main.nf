@@ -10,6 +10,7 @@ process ASM_VISUALIZATION {
 
     output:
     tuple val(meta), path("*.bandage.html"), emit: bandage_viz
+    tuple val("${task.process}"), val('bandage'), eval("Bandage --version | cut -d ' ' -f2"), emit: versions_bandage, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -104,10 +105,5 @@ process ASM_VISUALIZATION {
         sed -i 's/<!--//g; s/-->//g' ${prefix}.bandage.html
     fi
 
-    # version control
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        bandage: \$(Bandage --version | cut -d " " -f2)
-    END_VERSIONS
     """
 }

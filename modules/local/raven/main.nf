@@ -11,6 +11,7 @@ process RAVEN_ASM {
     tuple val(meta), path("*.fasta"), emit: asm
     tuple val(meta), path("*.gfa"), emit: asm_graph
     tuple val(meta), path("*.raven.ctg_len.txt"), emit: asm_ctg_len
+    tuple val("${task.process}"), val('raven'), eval("raven --version"), emit: versions_raven, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -32,10 +33,5 @@ process RAVEN_ASM {
     echo "Raven" > ${prefix}.raven.ctg_len.txt
     awk -F'LN:i:' '/^>/{split(\$2,a," "); print a[1]}' ${prefix}.raven.fasta | sort -nr >> ${prefix}.raven.ctg_len.txt
 
-    # version control
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        raven: \$(raven --version)
-    END_VERSIONS
     """
 }

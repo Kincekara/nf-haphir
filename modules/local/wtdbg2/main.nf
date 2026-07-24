@@ -10,6 +10,7 @@ process WTDBG2_ASM {
     output:
     tuple val(meta), path("*.fasta"), emit: asm
     tuple val(meta), path("*.wtdbg2.ctg_len.txt"), emit: asm_ctg_len
+    tuple val("${task.process}"), val('wtdbg2'), eval("wtdbg2 --version | cut -d ' ' -f2"), emit: versions_wtdbg2, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -35,10 +36,5 @@ process WTDBG2_ASM {
     echo "Wtdbg2" > ${prefix}.wtdbg2.ctg_len.txt
     awk -F'len=' '/^>/{print \$2}' ${prefix}.wtdbg2.fasta | sort -nr >> ${prefix}.wtdbg2.ctg_len.txt
 
-    # version control
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        wtdbg2: \$(wtdbg2 --version | cut -d " " -f2)
-    END_VERSIONS
     """
 }

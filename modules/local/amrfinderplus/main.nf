@@ -9,6 +9,8 @@ process AMRFINDER {
 
     output:
     tuple val(meta), path("*.amrfinder.tsv"), emit: amrfinder_report
+    tuple val("${task.process}"), val('amrfinderplus'), eval("amrfinder --version"), emit: versions_amrfinderplus, topic: versions
+    tuple val("${task.process}"), val('amrfinderplus_db'), eval("amrfinder --database_version | grep 'Database version' | awk -F': ' '{print \$2}'"), emit: versions_amrfinderplus_db, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -151,11 +153,5 @@ process AMRFINDER {
     --annotation_format bakta \\
     -o ${prefix}.amrfinder.tsv
 
-    # version control
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        amrfinderplus: \$(amrfinder --version)
-        amrfinderplus_db: \$(amrfinder --database_version | grep "Database version" | awk -F': ' '{print \$2}')
-    END_VERSIONS
     """
 }

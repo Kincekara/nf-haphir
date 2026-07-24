@@ -10,6 +10,7 @@ process TRIM_PE {
     output:
     tuple val(meta), path("*.trimmed.fq1.gz"), path("*.trimmed.fq2.gz"), emit: trimmed_short_fqs
     tuple val(meta), path("*.fastp.html"), emit: fastp_report
+    tuple val("${task.process}"), val('fastp'), eval("fastp --version | cut -d ' ' -f2"), emit: versions_fastp, topic: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -37,10 +38,5 @@ process TRIM_PE {
     --thread ${task.cpus} \\
     -h ${prefix}.fastp.html
 
-    # version control
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        fastp: \$(fastp --version | cut -d " " -f2)
-    END_VERSIONS
     """
 }
