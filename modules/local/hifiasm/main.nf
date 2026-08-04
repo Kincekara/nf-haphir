@@ -1,7 +1,6 @@
 process HIFIASM_ASM {
 
     tag "$meta.id"
-    label 'process_high'
     container 'staphb/hifiasm:0.25.0'
 
     input:

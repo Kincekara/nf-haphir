@@ -1,7 +1,6 @@
 process PLASSEMBLER_ASM {
     
     tag "$meta.id"
-    label 'process_high'
     container 'staphb/plassembler:1.8.3'
 
     input:
