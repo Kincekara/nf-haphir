@@ -30,6 +30,7 @@ lint:
     - .github/ISSUE_TEMPLATE/config.yml
     - .github/workflows/awstest.yml
     - .github/workflows/awsfulltest.yml
+    - .github/workflows/pr-comment.yml
     - CITATIONS.md
   files_unchanged:
     - docs/CONTRIBUTING.md
