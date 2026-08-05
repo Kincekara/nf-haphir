@@ -1,7 +1,6 @@
 process ASM_VISUALIZATION {
     
     tag "$meta.id"
-    label 'process_low'
     container 'staphb/bandage:0.9.0'
 
     input:

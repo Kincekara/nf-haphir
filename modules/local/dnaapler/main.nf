@@ -1,7 +1,6 @@
 process REORIENT {
     
     tag "$meta.id"
-    label 'process_medium'
     container 'staphb/dnaapler:1.3.0'
 
     input:
