@@ -2,7 +2,7 @@ process WTDBG2_ASM {
 
     tag "$meta.id"
     label 'process_high'
-    container 'staphb/wtdbg2:2.5'
+    container 'kincekara/wtdbg2:2.5'
 
     input:
     tuple val(meta), path(long_fq), val(genome_size)
