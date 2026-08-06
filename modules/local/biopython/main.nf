@@ -9,6 +9,7 @@ process MERGE_ASMS {
 
     output:
     tuple val(meta), path("*.merged.fasta"), emit: merged_asm
+    tuple val(meta), path("*.merge_summary.tsv"), emit: merge_summary
     tuple val("${task.process}"), val('biopython'), eval("python3 -c \"import Bio; print(Bio.__version__)\""), emit: versions_biopython, topic: versions
 
     when:
