@@ -1,3 +1,7 @@
 reports:
-  samplesheet.csv:
-    display: "Auto-created samplesheet with collated metadata and FASTQ paths"
+  "**/asm/*.bandage.html":
+    display: "Assembly graph"
+  "**/merge/*.merge_summary.tsv":
+    display: "Assembly merge summary"
+  "**/amrfinder/*.amrfinder.tsv":
+    display: "AMRFinder results"
