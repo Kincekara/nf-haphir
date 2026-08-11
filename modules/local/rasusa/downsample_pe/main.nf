@@ -20,7 +20,7 @@ process DOWNSAMPLE_PE {
     # downsample pe reads
     rasusa reads \\
     --seed 42 \\
-    --coverage 110 \\
+    --coverage 100 \\
     --genome-size ${genome_size} \\
     -o ${prefix}.downsampled.r1.fastq.gz \\
     -o ${prefix}.downsampled.r2.fastq.gz \\

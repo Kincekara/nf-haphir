@@ -20,7 +20,7 @@ process DOWNSAMPLE {
     # downsample reads
     rasusa reads \\
     --seed 42 \\
-    --coverage 110 \\
+    --coverage 100 \\
     --genome-size ${genome_size} \
     --output ${prefix}.downsampled.fastq.gz \
     --output-format fastq \\
