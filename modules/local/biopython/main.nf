@@ -28,5 +28,7 @@ process MERGE_ASMS {
 
     mv merge_summary.tsv ${prefix}.merge_summary.tsv
 
+    # fix fasta headers
+    sed -i 's/len=/length=/g' ${prefix}.merged.fasta   
     """
 }
