@@ -5,6 +5,9 @@
 */
 include { paramsSummaryMap       } from 'plugin/nf-schema'
 include { softwareVersionsToYAML } from '../../subworkflows/nf-core/utils_nfcore_pipeline'
+include { CONSENSUS_ASM as CONSENSUS_ATT1} from '../../subworkflows/local/consensus/'
+include { CONSENSUS_ASM as CONSENSUS_ATT2 } from '../../subworkflows/local/consensus/'
+include { CONSENSUS_ASM as CONSENSUS_ATT3 } from '../../subworkflows/local/consensus/'
 include { ESTIMATE_GENOME_SIZE   } from '../../modules/local/lrge/'
 include { DOWNSAMPLE             } from '../../modules/local/rasusa/downsample'
 include { DOWNSAMPLE_PE          } from '../../modules/local/rasusa/downsample_pe'
@@ -91,6 +94,11 @@ workflow HAPHIR {
         .filter { tuple -> tuple[0].hybrid == false }
         .view { tuple -> "HiFi-only samples: ${tuple[0].id}" }
 
+    def ch_consensus = channel.empty()
+    def ch_asm_graph = channel.empty()
+    def ch_asm_ctg_len = channel.empty()
+    def ch_opt_asm = channel.empty()
+    def ch_opt_ctg_len = channel.empty()
 
     // Genome size estimation
     ESTIMATE_GENOME_SIZE(ch_input.long_fq)
@@ -113,24 +121,36 @@ workflow HAPHIR {
         .join(ESTIMATE_GENOME_SIZE.out.gsize)
     )
 
-    // Wtdbg2 assembly
-    WTDBG2_ASM(
-        DOWNSAMPLE.out.downsampled_fq
-        .join(ESTIMATE_GENOME_SIZE.out.gsize)
-    )
-
     // Raven assembly
     RAVEN_ASM(
         DOWNSAMPLE.out.downsampled_fq
-    )
+    )   
 
-    // Combine assemblies with Autocycler
-    COMBINE_ASMS(
-        HIFIASM_ASM.out.asm
-        .join(FLYE_ASM.out.asm)
-        .join(WTDBG2_ASM.out.asm)
-        .join(RAVEN_ASM.out.asm)
-    )
+    // --> Autocycler consensus assembly attempts
+    CONSENSUS_ATT1 (HIFIASM_ASM.out.asm.join(FLYE_ASM.out.asm).join(RAVEN_ASM.out.asm),DOWNSAMPLE.out.downsampled_fq.join(ESTIMATE_GENOME_SIZE.out.gsize), 0)
+    ch_consensus = CONSENSUS_ATT1.out.combined_asm
+    ch_asm_graph = CONSENSUS_ATT1.out.combined_asm_graph
+    ch_asm_ctg_len = CONSENSUS_ATT1.out.combined_asm_ctg_len
+    ch_opt_asm = CONSENSUS_ATT1.out.opt_asm
+    ch_opt_ctg_len = CONSENSUS_ATT1.out.opt_ctg_len
+
+    if (CONSENSUS_ATT1.out.result == "FAIL") {
+        CONSENSUS_ATT2 (HIFIASM_ASM.out.asm.join(FLYE_ASM.out.asm).join(RAVEN_ASM.out.asm),DOWNSAMPLE.out.downsampled_fq.join(ESTIMATE_GENOME_SIZE.out.gsize), 1)
+        ch_consensus = CONSENSUS_ATT2.out.combined_asm
+        ch_asm_graph = CONSENSUS_ATT2.out.combined_asm_graph
+        ch_asm_ctg_len = CONSENSUS_ATT2.out.combined_asm_ctg_len
+        ch_opt_asm = CONSENSUS_ATT2.out.opt_asm
+        ch_opt_ctg_len = CONSENSUS_ATT2.out.opt_ctg_len
+    }
+    if (CONSENSUS_ATT1.out.result == "FAIL" && CONSENSUS_ATT2.out.result == "FAIL"){
+        CONSENSUS_ATT3 (HIFIASM_ASM.out.asm.join(FLYE_ASM.out.asm).join(RAVEN_ASM.out.asm),DOWNSAMPLE.out.downsampled_fq.join(ESTIMATE_GENOME_SIZE.out.gsize), 2)
+        ch_consensus = CONSENSUS_ATT3.out.combined_asm
+        ch_asm_graph = CONSENSUS_ATT3.out.combined_asm_graph
+        ch_asm_ctg_len = CONSENSUS_ATT3.out.combined_asm_ctg_len
+        ch_opt_asm = CONSENSUS_ATT3.out.opt_asm
+        ch_opt_ctg_len = CONSENSUS_ATT3.out.opt_ctg_len
+    }
+    // <--
 
     // Downsample PE reads if available
     DOWNSAMPLE_PE(
@@ -163,8 +183,7 @@ workflow HAPHIR {
 
     // Label contigs and align with minimap2
     LABEL_AND_ALIGN(
-        COMBINE_ASMS.out.asm
-        .join(PLASSEMBLER_ASM.out.asm
+        ch_consensus.join(PLASSEMBLER_ASM.out.asm
             .mix(PLASSEMBLER_ASM_LONG.out.asm)
         )
     )
@@ -185,22 +204,22 @@ workflow HAPHIR {
         .mix(MERGE_ASMS.out.merged_asm
             .filter { tuple -> tuple[0].hybrid == false }
         )
-    ) 
-    
+    )   
+
     // Visualize assemblies with Bandage
     ASM_VISUALIZATION(
         HIFIASM_ASM.out.asm_graph
         .join(FLYE_ASM.out.asm_graph)
         .join(RAVEN_ASM.out.asm_graph)
-        .join(WTDBG2_ASM.out.asm)
-        .join(COMBINE_ASMS.out.asm_graph)
+        .join(ch_opt_asm)
+        .join(ch_asm_graph)
         .join(PLASSEMBLER_ASM.out.asm_graph.mix(PLASSEMBLER_ASM_LONG.out.asm_graph))
         .join(REORIENT.out.reoriented_asm)
         .join(HIFIASM_ASM.out.asm_ctg_len)
         .join(FLYE_ASM.out.asm_ctg_len)
         .join(RAVEN_ASM.out.asm_ctg_len)
-        .join(WTDBG2_ASM.out.asm_ctg_len)
-        .join(COMBINE_ASMS.out.asm_ctg_len)
+        .join(ch_opt_ctg_len)
+        .join(ch_asm_ctg_len)
         .join(PLASSEMBLER_ASM.out.asm_ctg_len.mix(PLASSEMBLER_ASM_LONG.out.asm_ctg_len))
         .join(REORIENT.out.asm_ctg_len)
     )
