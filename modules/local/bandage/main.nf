@@ -4,8 +4,8 @@ process ASM_VISUALIZATION {
     container 'staphb/bandage:0.9.0'
 
     input:
-    tuple val(meta), path(hifiasm_gfa), path(flye_gfa), path(raven_gfa), path(wtdbg2_asm), path(autocycler_gfa), path(plassembler_gfa), path(final_asm),
-    path(hifiasm_ctg_len), path(flye_ctg_len), path(raven_ctg_len), path(wtdbg2_ctg_len), path(autocycler_ctg_len), path(plassembler_ctg_len), path(final_ctg_len)
+    tuple val(meta), path(hifiasm_gfa), path(flye_gfa), path(raven_gfa), path(opt_gfa), path(autocycler_gfa), path(plassembler_gfa), path(final_asm),
+    path(hifiasm_ctg_len), path(flye_ctg_len), path(raven_ctg_len), path(opt_ctg_len), path(autocycler_ctg_len), path(plassembler_ctg_len), path(final_ctg_len)
 
     output:
     tuple val(meta), path("*.bandage.html"), emit: bandage_viz
@@ -16,12 +16,24 @@ process ASM_VISUALIZATION {
 
     script:
     def prefix = task.ext.prefix ?: "${meta.id}"
+    def version = "v${workflow.manifest.version}"
     """
+    filename=\$(basename ${opt_gfa})
+    if [[ "\$filename" == *"wtdbg2"* ]]; then
+        opt_asm_name="Wtdbg2"
+    elif [[ "\$filename" == *"hicanu"* ]]; then
+        opt_asm_name="HiCanu"
+    elif [[ "\$filename" == *"lja"* ]]; then
+        opt_asm_name="LJA"
+    else
+        opt_asm_name="Unknown"
+    fi
+
     # Bandage
     Bandage image ${hifiasm_gfa} hifiasm.png
     Bandage image ${flye_gfa} flye.png
     Bandage image ${raven_gfa} raven.png
-    Bandage image ${wtdbg2_asm} wtdbg2.png
+    Bandage image ${opt_gfa} opt.png
     Bandage image ${autocycler_gfa} autocycler.png
     if [ -s "${plassembler_gfa}" ]; then
         Bandage image ${plassembler_gfa} plassembler.png
@@ -30,9 +42,9 @@ process ASM_VISUALIZATION {
 
     # create tables of contig lengths
     if [ -s "${plassembler_ctg_len}" ]; then
-        paste ${hifiasm_ctg_len} ${flye_ctg_len} ${raven_ctg_len} ${wtdbg2_ctg_len} ${autocycler_ctg_len} ${plassembler_ctg_len} ${final_ctg_len} > ctg_len_table.txt
+        paste ${hifiasm_ctg_len} ${flye_ctg_len} ${raven_ctg_len} ${opt_ctg_len} ${autocycler_ctg_len} ${plassembler_ctg_len} ${final_ctg_len} > ctg_len_table.txt
     else
-        paste ${hifiasm_ctg_len} ${flye_ctg_len} ${raven_ctg_len} ${wtdbg2_ctg_len} ${autocycler_ctg_len} ${final_ctg_len} > ctg_len_table.txt
+        paste ${hifiasm_ctg_len} ${flye_ctg_len} ${raven_ctg_len} ${opt_ctg_len} ${autocycler_ctg_len} ${final_ctg_len} > ctg_len_table.txt
     fi
 
     create_len_table.sh ctg_len_table.txt table
@@ -73,7 +85,7 @@ process ASM_VISUALIZATION {
                 </div>
                 <div class="grid-item">
                     <div class="caption">Wtdbg2</div>
-                    <img src="data:image/png;base64,\$(base64 -w 0 wtdbg2.png)" alt="Wtdbg2" />
+                    <img src="data:image/png;base64,\$(base64 -w 0 opt.png)" alt="\$opt_asm_name" />
                 </div>
                 <div class="grid-item">
                     <div class="caption">Autocycler</div>
@@ -95,7 +107,7 @@ process ASM_VISUALIZATION {
         </body>
         <hr>
         <footer>
-        <p><i>This report is created by <a href="https://github.com/Kincekara/haphir">HAPHiR</a> bioinformatics pipeline.</br></i></p>
+        <p><i>This report is created by <a href="https://github.com/Kincekara/nf-haphir">nf-HAPHiR ${version}</a> bioinformatics pipeline.</br></i></p>
         </footer>
     </html>
     EOF
