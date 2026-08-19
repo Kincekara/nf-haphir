@@ -84,7 +84,7 @@ process ASM_VISUALIZATION {
                     <img src="data:image/png;base64,\$(base64 -w 0 raven.png)" alt="Raven" />
                 </div>
                 <div class="grid-item">
-                    <div class="caption">Wtdbg2</div>
+                    <div class="caption">\$opt_asm_name</div>
                     <img src="data:image/png;base64,\$(base64 -w 0 opt.png)" alt="\$opt_asm_name" />
                 </div>
                 <div class="grid-item">
