@@ -8,7 +8,7 @@ process HICANU_ASM {
 
     output:
     tuple val(meta), path("*.hicanu.fasta"), emit: asm
-    tuple val(meta), path("*.hificanu.ctg_len.txt"), emit: asm_ctg_len
+    tuple val(meta), path("*.hicanu.ctg_len.txt"), emit: asm_ctg_len
     tuple val("${task.process}"), val('canu'), eval("canu --version | cut -d ' ' -f 2"), emit: versions_canu, topic: versions
 
     when:
