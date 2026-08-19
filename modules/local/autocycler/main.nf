@@ -12,7 +12,7 @@ process COMBINE_ASMS {
     tuple val(meta), path("*.autocycler.gfa"), emit: asm_graph
     tuple val(meta), path("*.autocycler.ctg_len.txt"), emit: asm_ctg_len
     tuple val("${task.process}"), val('autocycler'), eval("autocycler --version | cut -d ' ' -f2"), emit: versions_autocycler, topic: versions
-    tuple val(meta), eval("cat RESULT"), emit: result
+    tuple val(meta), path("RESULT"), emit: result
 
     when:
     task.ext.when == null || task.ext.when
