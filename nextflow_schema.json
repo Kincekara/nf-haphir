@@ -34,7 +34,7 @@
                     "help_text": "If true, pipeline will run AMRFinderPlus to identify antimicrobial resistance genes in the assembled genomes. If false, the AMRFinderPlus step will be skipped."
                 },
                 "preset": {
-                    "type": "string",
+                    "type": ["integer", "string"],
                     "description": "Assembly preset to determine the order of assembly tools",
                     "pattern": "^([1-3])$"
                 },
