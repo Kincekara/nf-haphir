@@ -4,7 +4,7 @@ process LJA_ASM {
     container 'staphb/lja:0.2-bugfix'
 
     input:
-    tuple val(meta), path(long_fq), val(genome_size)
+    tuple val(meta), path(long_fq)
 
     output:
     tuple val(meta), path("*.lja.fasta"), emit: asm
