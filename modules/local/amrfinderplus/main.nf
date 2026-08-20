@@ -2,7 +2,7 @@ process AMRFINDER {
 
     tag "$meta.id"
     label 'process_medium'
-    container 'staphb/ncbi-amrfinderplus:4.2.7-2026-05-15.1'
+    container 'staphb/ncbi-amrfinderplus:4.2.7-2026-08-07.1'
 
     input:
     tuple val(meta), path(assembly), path(bakta_faa), path(bakta_gff), val(organism)
