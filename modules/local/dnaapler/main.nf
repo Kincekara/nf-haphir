@@ -1,7 +1,7 @@
 process REORIENT {
     
     tag "$meta.id"
-    container 'staphb/dnaapler:1.3.0'
+    container 'staphb/dnaapler:1.4.0'
 
     input:
     tuple val(meta), path(long_asm)
