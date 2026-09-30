@@ -2,7 +2,7 @@ process TRIM_PE {
     
     tag "$meta.id"
     label 'process_low'
-    container 'staphb/fastp:1.3.2'
+    container 'staphb/fastp:1.3.7'
 
     input:
     tuple val(meta), path(short_fq1), path(short_fq2)
