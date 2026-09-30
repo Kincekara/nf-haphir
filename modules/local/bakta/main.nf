@@ -2,7 +2,7 @@ process ANNOTATION {
     
     tag "$meta.id"
     label 'process_medium'
-    container 'staphb/bakta:1.12.0-6.0-light'
+    container 'staphb/bakta:1.12.1-6.0-light'
 
     input:
     tuple val(meta), path(final_asm), val(organism)
