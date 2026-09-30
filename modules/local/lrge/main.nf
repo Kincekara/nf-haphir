@@ -2,7 +2,7 @@ process ESTIMATE_GENOME_SIZE {
 
     tag "$meta.id"
     label 'process_medium'
-    container 'staphb/lrge:0.3.0'
+    container 'staphb/lrge:1.0.0'
 
     input:
     tuple val(meta), path(long_fq)
