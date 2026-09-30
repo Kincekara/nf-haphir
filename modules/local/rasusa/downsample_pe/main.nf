@@ -9,6 +9,7 @@ process DOWNSAMPLE_PE {
 
     output:
     tuple val(meta), path("*.r1.fastq.gz"), path("*.r2.fastq.gz"), emit: short_fqs
+    tuple val(meta), path("*.short_fq_cov.txt"), emit: short_fq_coverage
     tuple val("${task.process}"), val('rasusa'), eval("rasusa --version | cut -d ' ' -f 2"), emit: versions_rasusa, topic: versions
 
     when:
@@ -24,7 +25,9 @@ process DOWNSAMPLE_PE {
     --genome-size ${genome_size} \\
     -o ${prefix}.downsampled.r1.fastq.gz \\
     -o ${prefix}.downsampled.r2.fastq.gz \\
-    ${short_fq1} ${short_fq2}
+    ${short_fq1} ${short_fq2} 2>&1 | tee ${prefix}.rasusa.log
 
+    # get coverage
+    grep "Input coverage is" ${prefix}.rasusa.log | awk '{print \$(NF)}' > ${prefix}.short_fq_cov.txt
     """
 }
