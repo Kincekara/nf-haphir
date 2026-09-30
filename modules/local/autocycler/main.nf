@@ -2,7 +2,7 @@ process COMBINE_ASMS {
 
     tag "$meta.id"
     label 'process_high'
-    container 'staphb/autocycler:0.6.2'
+    container 'staphb/autocycler:0.7.0'
 
     input:
     tuple val(meta), path(hifiasm_asm), path(flye_asm), path(raven_asm), path(opt_asm)
