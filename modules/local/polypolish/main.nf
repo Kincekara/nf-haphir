@@ -2,7 +2,7 @@ process POLISH {
     
     tag "$meta.id"
     label 'process_medium'
-    container 'staphb/polypolish:0.6.1-bwa'
+    container 'staphb/polypolish:0.7.1-bwa'
 
     input:
     tuple val(meta), path(draft_asm), path(short_fq1), path(short_fq2)
