@@ -5,3 +5,7 @@ reports:
     display: "Assembly merge summary"
   "**/amrfinder/*.amrfinder.tsv":
     display: "AMRFinder results"
+  "**/filter/*.tgsfilter.html":
+    display: "TGSFilter summary"
+  "**/asm/*.merqury.html":
+    display: "Assembly QC"
