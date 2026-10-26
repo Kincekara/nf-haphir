@@ -46,7 +46,8 @@
                 },
                 "min_length": {
                     "type": ["integer", "string"],
-                    "description": "Minimum hifi read lenght to filter. Default is 0 to disable lenght filter."
+                    "description": "Minimum HiFi read length to filter. Default is 0 (disabled).",
+                    "default": 0
                 },
                 "email": {
                     "type": "string",
