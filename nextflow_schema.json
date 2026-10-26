@@ -44,6 +44,10 @@
                     "description": "The output directory where the results will be saved. You have to use absolute paths to storage on Cloud infrastructure.",
                     "fa_icon": "fas fa-folder-open"
                 },
+                "min_length": {
+                    "type": ["integer", "string"],
+                    "description": "Minimum hifi read lenght to filter. Default is 0 to disable lenght filter."
+                },
                 "email": {
                     "type": "string",
                     "description": "Email address for completion summary.",
