@@ -1,7 +1,6 @@
 process POLISH {
     
     tag "$meta.id"
-    label 'process_medium'
     container 'staphb/polypolish:0.7.1-bwa'
 
     input:

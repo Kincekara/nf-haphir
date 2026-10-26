@@ -1,7 +1,6 @@
 process MERGE_ASMS {
     
     tag "$meta.id"
-    label 'process_low'
     container 'quay.io/biocontainers/biopython:1.84'
 
     input:

@@ -1,7 +1,6 @@
 process DOWNSAMPLE {
 
     tag "$meta.id"
-    label 'process_low'
     container 'staphb/rasusa:4.1.0'
 
     input:

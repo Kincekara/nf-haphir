@@ -1,7 +1,7 @@
 process COMBINE_ASMS {
 
     tag "$meta.id"
-    label 'process_high'
+    label 'process_medium'
     container 'staphb/autocycler:0.7.0'
 
     input:

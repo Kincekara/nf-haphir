@@ -1,6 +1,7 @@
 process LJA_ASM {
 
     tag "$meta.id"
+    label 'process_high'
     container 'staphb/lja:0.2-bugfix'
 
     input:

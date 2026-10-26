@@ -1,7 +1,7 @@
 process WTDBG2_ASM {
 
     tag "$meta.id"
-    label 'process_high'
+    label 'process_medium'
     container 'staphb/wtdbg2:2.5-noble'
 
     input:

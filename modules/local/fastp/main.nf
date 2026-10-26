@@ -1,7 +1,6 @@
 process TRIM_PE {
     
     tag "$meta.id"
-    label 'process_low'
     container 'staphb/fastp:1.3.7'
 
     input:
