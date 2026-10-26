@@ -10,7 +10,7 @@ process ASM_QC {
     output:    
     tuple val(meta), path("*.html"), emit: merqury_html
     tuple val(meta), path("logs/*.log"), emit: merqury_log
-    tuple val(meta), path("*.qv"), path("*.completeness.stats"), path("EVAL"), emit: merqury_stats
+    tuple val(meta), path("*.qv"), path("*.completeness.stats"), path("EVAL.txt"), emit: merqury_stats
     tuple val("${task.process}"), val('merqury'), val("1.4.1"), emit: versions_merqury, topic: versions
 
     when:
