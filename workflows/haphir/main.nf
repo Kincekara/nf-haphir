@@ -7,6 +7,7 @@ include { paramsSummaryMap       } from 'plugin/nf-schema'
 include { softwareVersionsToYAML } from '../../subworkflows/nf-core/utils_nfcore_pipeline'
 include { CONSENSUS_ASM  } from '../../subworkflows/local/consensus/'
 include { ESTIMATE_GENOME_SIZE   } from '../../modules/local/lrge/'
+include { FILTER                 } from '../../modules/local/tgsfilter/'
 include { DOWNSAMPLE             } from '../../modules/local/rasusa/downsample'
 include { DOWNSAMPLE_PE          } from '../../modules/local/rasusa/downsample_pe'
 include { FLYE_ASM               } from '../../modules/local/flye/'
@@ -22,6 +23,8 @@ include { MERGE_ASMS             } from '../../modules/local/biopython/'
 include { POLISH                 } from '../../modules/local/polypolish/'
 include { REORIENT               } from '../../modules/local/dnaapler/'
 include { ASM_VISUALIZATION      } from '../../modules/local/bandage/'
+include { ASM_QC                 } from '../../modules/local/merqury/asm_qc/'
+include { ASM_QC_LONG            } from '../../modules/local/merqury/asm_qc_long/'
 include { ANNOTATION             } from '../../modules/local/bakta/'
 include { AMRFINDER              } from '../../modules/local/amrfinderplus/'
 
@@ -95,11 +98,16 @@ workflow HAPHIR {
     // Genome size estimation
     ESTIMATE_GENOME_SIZE(ch_input.long_fq)
 
+    // Adepter trim and filter
+    FILTER(
+        ch_input.long_fq
+    )
+
     // Downsampling
     DOWNSAMPLE(
-        ch_input.long_fq
+        FILTER.out.filtered_fq
         .join(ESTIMATE_GENOME_SIZE.out.gsize)
-        )
+    )
 
     // Flye assembly
     FLYE_ASM(
@@ -120,17 +128,21 @@ workflow HAPHIR {
 
     // Autocycler consensus
     CONSENSUS_ASM(
-        HIFIASM_ASM.out.asm.join(FLYE_ASM.out.asm).join(RAVEN_ASM.out.asm),DOWNSAMPLE.out.downsampled_fq.join(ESTIMATE_GENOME_SIZE.out.gsize))
+        HIFIASM_ASM.out.asm.join(FLYE_ASM.out.asm).join(RAVEN_ASM.out.asm),
+        DOWNSAMPLE.out.downsampled_fq.join(ESTIMATE_GENOME_SIZE.out.gsize)
+    )
 
-    // Downsample PE reads if available
-    DOWNSAMPLE_PE(
+    // Trim PE reads with fastp if available
+    TRIM_PE(
         ch_input.short_fqs
-        .filter { tuple -> tuple[0].hybrid == true }
-        .join(ESTIMATE_GENOME_SIZE.out.gsize)
-        )
+        .filter { tuple -> tuple[0].hybrid == true } 
+    )    
     
-    // Trim PE reads with fastp
-    TRIM_PE(DOWNSAMPLE_PE.out.short_fqs)
+    // Downsample PE reads
+    DOWNSAMPLE_PE(
+        TRIM_PE.out.trimmed_short_fqs
+        .join(ESTIMATE_GENOME_SIZE.out.gsize)
+    )
 
     // --> Recover plasmids with plassembler
     // (hybrid)
@@ -139,7 +151,7 @@ workflow HAPHIR {
         .filter { tuple -> tuple[0].hybrid == true }        
         .join(FLYE_ASM.out.asm)
         .join(FLYE_ASM.out.asm_info)
-        .join(TRIM_PE.out.trimmed_short_fqs)
+        .join(DOWNSAMPLE_PE.out.short_fqs)
     )
 
     // (HiFi-only)
@@ -192,6 +204,19 @@ workflow HAPHIR {
         .join(CONSENSUS_ASM.out.combined_asm_ctg_len)
         .join(PLASSEMBLER_ASM.out.asm_ctg_len.mix(PLASSEMBLER_ASM_LONG.out.asm_ctg_len))
         .join(REORIENT.out.asm_ctg_len)
+    )
+
+    // Assembly quality control with Merqury
+    ASM_QC(
+        REORIENT.out.reoriented_asm
+        .filter { tuple -> tuple[0].hybrid == true } 
+        .join(TRIM_PE.out.trimmed_short_fqs)
+    )
+
+    ASM_QC_LONG(
+        REORIENT.out.reoriented_asm
+        .filter { tuple -> tuple[0].hybrid == false }
+        .join(FILTER.out.filtered_fq)
     )
 
     // Annotate with Bakta if requested
