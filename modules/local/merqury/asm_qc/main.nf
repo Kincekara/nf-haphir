@@ -18,6 +18,7 @@ process ASM_QC {
 
     script:
     def prefix = task.ext.prefix ?: "${meta.id}"
+    def version = "v${workflow.manifest.version}"
     """
     # meryl count
     meryl count threads=${task.cpus} k=19 ${short_fq1} ${short_fq2} output reads.meryl
@@ -110,7 +111,7 @@ process ASM_QC {
         </body>
         <hr>
         <footer>
-        <p><i>This report is created by <a href="https://github.com/Kincekara/haphir">HAPHiR</a> bioinformatics pipeline.</br></i></p>
+        <p><i>This report is created by <a href="https://github.com/Kincekara/nf-haphir">nf-HAPHiR ${version}</a> bioinformatics pipeline.</br></i></p>
         </footer>
     </html>
     EOF
