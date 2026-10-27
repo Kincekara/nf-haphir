@@ -17,7 +17,7 @@ if [[ "$mode" == "hybrid" ]]; then
             exit 1
         }'
     then
-        echo "PASS" > EVAL
+        echo "PASS" > EVAL.txt
     else
         echo "WARN[C:$comp,QV:$qv]" > EVAL.txt
     fi
@@ -30,7 +30,7 @@ if [[ "$mode" == "hifi" ]]; then
             exit 1
         }'
     then
-        echo "PASS" > EVAL
+        echo "PASS" > EVAL.txt
 else
         echo "WARN[C:$comp,QV:$qv]" > EVAL.txt
     fi
