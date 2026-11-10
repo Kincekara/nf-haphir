@@ -9,6 +9,7 @@ process ESTIMATE_GENOME_SIZE {
 
     output:
     tuple val(meta), env("GSIZE"), emit: gsize
+    tuple val(meta), path("gsize.txt"), emit: gsize_txt
     tuple val("${task.process}"), val('lrge'), eval("lrge --version | cut -d ' ' -f2"), emit: versions_lrge, topic: versions
 
     when:
